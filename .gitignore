@@ -1,0 +1,49 @@
+# API Keys and Secrets
+*.key
+*.env
+.env*
+api_keys.txt
+secrets.txt
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# macOS
+.DS_Store
+._*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Node modules
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Test outputs
+coverage/
+.coverage
+.pytest_cache/
