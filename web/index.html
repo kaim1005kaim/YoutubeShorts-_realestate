@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>不動産YouTubeショート生成ツール</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1f2937',
+                        secondary: '#3b82f6',
+                        accent: '#10b981'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- ヘッダー -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-primary mb-4">🏠 不動産YouTubeショート生成ツール</h1>
+            <p class="text-gray-600 text-lg">AIが自動で魅力的な30秒スクリプトを生成します</p>
+        </div>
+
+        <!-- APIキー設定 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">🔑 API設定</h2>
+            <div class="flex gap-4">
+                <input 
+                    type="password" 
+                    id="apiKey" 
+                    placeholder="DeepSeek APIキーを入力..."
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent"
+                >
+                <button 
+                    onclick="saveApiKey()"
+                    class="px-6 py-2 bg-secondary text-white rounded-lg hover:bg-blue-600 transition duration-200"
+                >
+                    保存
+                </button>
+            </div>
+            <p class="text-sm text-gray-500 mt-2">APIキーはブラウザのローカルストレージに保存されます</p>
+        </div>
+
+        <!-- 単一物件入力 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">📝 物件情報入力</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">物件名</label>
+                    <input type="text" id="propertyName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary" placeholder="サンシャインマンション301号室">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">家賃</label>
+                    <input type="text" id="rent" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary" placeholder="7.5万円">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">最寄り駅</label>
+                    <input type="text" id="station" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary" placeholder="渋谷駅徒歩8分">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">間取り</label>
+                    <input type="text" id="layout" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary" placeholder="1LDK（35㎡）">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">築年数</label>
+                    <input type="text" id="age" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary" placeholder="築5年">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">特徴</label>
+                    <input type="text" id="features" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary" placeholder="ペット可、オートロック、宅配ボックス">
+                </div>
+            </div>
+            <button 
+                onclick="generateSingleScript()"
+                class="w-full px-6 py-3 bg-accent text-white rounded-lg hover:bg-green-600 transition duration-200 font-semibold"
+            >
+                🎬 スクリプト生成
+            </button>
+        </div>
+
+        <!-- CSV一括処理 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">📊 CSV一括処理</h2>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">CSVファイル</label>
+                <input 
+                    type="file" 
+                    id="csvFile" 
+                    accept=".csv"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary"
+                >
+                <div class="mt-2 text-sm text-gray-500">
+                    <strong>形式:</strong> 物件名,家賃,最寄り駅,間取り,築年数,特徴
+                </div>
+                <div class="mt-2">
+                    <button 
+                        onclick="downloadTemplate()"
+                        class="text-blue-600 hover:underline text-sm"
+                    >
+                        📥 CSVテンプレートをダウンロード
+                    </button>
+                </div>
+            </div>
+            <button 
+                onclick="generateBatchScripts()"
+                class="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200 font-semibold text-lg"
+            >
+                🔄 一括生成
+            </button>
+        </section>
+
+        <!-- 使用例・ヒント -->
+        <section class="bg-yellow-50 rounded-lg p-6 mb-8 border border-yellow-200">
+            <h3 class="text-lg font-semibold text-yellow-800 mb-3">💡 効果的なスクリプト生成のコツ</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                <div>
+                    <h4 class="font-semibold mb-2">✨ 魅力的な特徴の書き方</h4>
+                    <ul class="space-y-1 text-xs">
+                        <li>• 「ペット可」「オートロック」など具体的に</li>
+                        <li>• 「駅徒歩◯分」「コンビニ徒歩1分」など距離明記</li>
+                        <li>• 「新築」「リノベ済」など状態を強調</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-2">🎯 ターゲット別キーワード</h4>
+                    <ul class="space-y-1 text-xs">
+                        <li>• 学生向け: 「学生歓迎」「家具付き」</li>
+                        <li>• 女性向け: 「女性専用」「セキュリティ」</li>
+                        <li>• ファミリー: 「角部屋」「日当たり良好」</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ローディング -->
+        <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 text-center max-w-sm mx-4">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary mx-auto mb-4"></div>
+                <p class="text-lg font-semibold mb-2">スクリプト生成中...</p>
+                <p class="text-sm text-gray-500">AIが最適なスクリプトを作成しています</p>
+            </div>
+        </div>
+
+        <!-- 結果表示 -->
+        <div id="results" class="space-y-6"></div>
+
+        <!-- 統計情報 -->
+        <section id="stats" class="hidden bg-white rounded-lg shadow-md p-6 mt-8">
+            <h2 class="text-2xl font-semibold mb-4">📊 生成統計</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="text-center p-4 bg-blue-50 rounded-lg">
+                    <div class="text-3xl font-bold text-secondary" id="totalGenerated">0</div>
+                    <div class="text-sm text-gray-500">生成済み</div>
+                </div>
+                <div class="text-center p-4 bg-green-50 rounded-lg">
+                    <div class="text-3xl font-bold text-accent" id="totalCost">$0.00</div>
+                    <div class="text-sm text-gray-500">総コスト</div>
+                </div>
+                <div class="text-center p-4 bg-purple-50 rounded-lg">
+                    <div class="text-3xl font-bold text-purple-600" id="avgCost">$0.00</div>
+                    <div class="text-sm text-gray-500">平均コスト</div>
+                </div>
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <div class="text-3xl font-bold text-gray-600" id="successRate">100%</div>
+                    <div class="text-sm text-gray-500">成功率</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- フッター -->
+        <footer class="text-center mt-12 py-8 border-t border-gray-200">
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">🛠️ 便利機能</h3>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button 
+                        onclick="downloadTemplate()"
+                        class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200 text-sm"
+                    >
+                        📥 CSVテンプレート
+                    </button>
+                    <button 
+                        onclick="clearAllResults()"
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200 text-sm"
+                    >
+                        🗑️ 結果をクリア
+                    </button>
+                    <a 
+                        href="https://github.com/kaim1005kaim/YoutubeShorts-_realestate" 
+                        target="_blank"
+                        class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition duration-200 text-sm"
+                    >
+                        📂 GitHub
+                    </a>
+                </div>
+            </div>
+            <div class="text-sm text-gray-500">
+                <p>© 2025 不動産YouTubeショート生成ツール</p>
+                <p class="mt-1">AIで効率的な動画マーケティングを実現</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary"
+                >
+                <p class="text-sm text-gray-500 mt-2">
+                    形式: 物件名,家賃,最寄り駅,間取り,築年数,特徴
+                </p>
+            </div>
+            <button 
+                onclick="generateBatchScripts()"
+                class="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200 font-semibold"
+            >
+                🔄 一括生成
+            </button>
+        </div>
+
+        <!-- ローディング -->
+        <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary mx-auto mb-4"></div>
+                <p class="text-lg font-semibold">スクリプト生成中...</p>
+                <p class="text-sm text-gray-500">しばらくお待ちください</p>
+            </div>
+        </div>
+
+        <!-- 結果表示 -->
+        <div id="results" class="space-y-6"></div>
+
+        <!-- 統計情報 -->
+        <div id="stats" class="hidden bg-white rounded-lg shadow-md p-6 mt-8">
+            <h2 class="text-2xl font-semibold mb-4">📊 生成統計</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-secondary" id="totalGenerated">0</div>
+                    <div class="text-sm text-gray-500">生成済み</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-accent" id="totalCost">$0.00</div>
+                    <div class="text-sm text-gray-500">総コスト</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-purple-600" id="avgCost">$0.00</div>
+                    <div class="text-sm text-gray-500">平均コスト</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CSVテンプレートダウンロード -->
+        <div class="text-center mt-8">
+            <button 
+                onclick="downloadTemplate()"
+                class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200"
+            >
+                📥 CSVテンプレートダウンロード
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
